@@ -46,9 +46,11 @@ void app_main(void)
 
     while (1) {
         vTaskDelay(500 / portTICK_RATE_MS);
-        cnt++;
         gpio_set_level(DENBIT_GREEN, cnt % 2);
+        gpio_set_level(DENBIT_RGB_GREEN, cnt % 2);
+        cnt++;
         gpio_set_level(DENBIT_RED, cnt % 2);
+        gpio_set_level(DENBIT_RGB_RED, cnt % 2);
         //printf("cnt:%i\n", cnt);
     }
 }
