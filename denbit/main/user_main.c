@@ -17,7 +17,7 @@
 
 // #define GPIO_OUTPUT_IO_0    2
 //#define GPIO_OUTPUT_PIN_SEL ( (1ULL<<DENBIT_GREEN) | (1ULL<<DENBIT_RED) | (1ULL<<DENBIT_RGB_RED) | (1ULL<<DENBIT_RGB_GREEN) | (1ULL<<DENBIT_RGB_BLUE))
-#define GPIO_OUTPUT_PIN_SEL ( (1ULL<<DENBIT_GREEN) | (1ULL<<DENBIT_RED) | (1ULL<<DENBIT_RGB_RED) | (1ULL<<DENBIT_RGB_GREEN) )
+#define GPIO_OUTPUT_PIN_SEL ( (1ULL<<DENBIT_GREEN) | (1ULL<<DENBIT_RED) | (1ULL<<DENBIT_RGB_RED) | (1ULL<<DENBIT_RGB_GREEN) | (1ULL<<DENBIT_RGB_BLUE))
 
 void denbit_config() {
     gpio_config_t io_conf;
@@ -40,6 +40,7 @@ void app_main(void)
     denbit_config();
     gpio_set_level(DENBIT_RGB_RED, 0);
     gpio_set_level(DENBIT_RGB_GREEN, 0);
+    gpio_set_level(DENBIT_RGB_BLUE, 0);
 
     int cnt = 0;
 
