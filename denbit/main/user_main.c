@@ -7,7 +7,7 @@
 
 #include "esp_system.h"
 
-#include "denbit/denbit.h"
+#include "denbit.h"
 
 void app_main(void)
 {
@@ -15,7 +15,7 @@ void app_main(void)
 
     int cnt = 0;
     while (1) {
-        vTaskDelay(500 / portTICK_RATE_MS);
+        vTaskDelay(1000 / portTICK_RATE_MS);
         gpio_set_level(DENBIT_GREEN, cnt % 2);
         gpio_set_level(DENBIT_RGB_GREEN, cnt % 2);
         cnt++;
