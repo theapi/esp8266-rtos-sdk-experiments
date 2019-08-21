@@ -1,6 +1,6 @@
 # _Blink_
 
-_Blinks an LED._
+_Configures the LEDs on the Denbit_
 
 ## GPIO functions
 
@@ -22,7 +22,7 @@ make menuconfig
 Build the project and flash it to the board, then run monitor tool to view serial output:
 
 ```
-make -j4 flash monitor
+make -j4 flash
 ```
 
 (To exit the serial monitor, type ``Ctrl-]``.)
