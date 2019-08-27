@@ -40,6 +40,31 @@ static xQueueHandle example_espnow_queue;
 static uint8_t example_broadcast_mac[ESP_NOW_ETH_ALEN] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 static uint16_t s_example_espnow_seq[EXAMPLE_ESPNOW_DATA_MAX] = { 0, 0 };
 
+TaskHandle_t greenBlinkTaskHandle;
+TaskHandle_t redBlinkTaskHandle;
+
+void greenBlinkTask(void *pvParameters)
+{
+    while(1) {
+        gpio_set_level(DENBIT_GREEN, 1);
+        vTaskDelay(100 / portTICK_RATE_MS);
+        gpio_set_level(DENBIT_GREEN, 0);
+        // Suspend ourselves.
+        vTaskSuspend( NULL );
+    }
+}
+
+void redBlinkTask(void *pvParameters)
+{
+    while(1) {
+        gpio_set_level(DENBIT_RED, 1);
+        vTaskDelay(100 / portTICK_RATE_MS);
+        gpio_set_level(DENBIT_RED, 0);
+        // Suspend ourselves.
+        vTaskSuspend( NULL );
+    }
+}
+
 static void example_espnow_deinit(example_espnow_send_param_t *send_param);
 
 static esp_err_t example_event_handler(void *ctx, system_event_t *event)
@@ -189,7 +214,8 @@ static void example_espnow_task(void *pvParameter)
                 example_espnow_event_send_cb_t *send_cb = &evt.info.send_cb;
                 is_broadcast = IS_BROADCAST_ADDR(send_cb->mac_addr);
 
-                gpio_set_level(DENBIT_GREEN, 1);
+                // Blink the green led.
+                vTaskResume( greenBlinkTaskHandle );
 
                 ESP_LOGD(TAG, "Send data to "MACSTR", status1: %d", MAC2STR(send_cb->mac_addr), send_cb->status);
 
@@ -209,7 +235,6 @@ static void example_espnow_task(void *pvParameter)
                 /* Delay a while before sending the next data. */
                 if (send_param->delay > 0) {
                     vTaskDelay(send_param->delay/portTICK_RATE_MS);
-                    gpio_set_level(DENBIT_GREEN, 0);
                 }
 
                 ESP_LOGI(TAG, "send data to "MACSTR"", MAC2STR(send_cb->mac_addr));
@@ -228,6 +253,9 @@ static void example_espnow_task(void *pvParameter)
             case EXAMPLE_ESPNOW_RECV_CB:
             {
                 example_espnow_event_recv_cb_t *recv_cb = &evt.info.recv_cb;
+
+                // Blink the red led.
+                vTaskResume( redBlinkTaskHandle );
 
                 ret = example_espnow_data_parse(recv_cb->data, recv_cb->data_len, &recv_state, &recv_seq, &recv_magic);
                 free(recv_cb->data);
@@ -380,6 +408,8 @@ static void example_espnow_deinit(example_espnow_send_param_t *send_param)
 void app_main()
 {
     denbit_init();
+    xTaskCreate(greenBlinkTask, "greenBlinkTask", 180, NULL, 1, &greenBlinkTaskHandle);
+    xTaskCreate(redBlinkTask, "redBlinkTask", 180, NULL, 1, &redBlinkTaskHandle);
 
     // Initialize NVS
     ESP_ERROR_CHECK( nvs_flash_init() );
