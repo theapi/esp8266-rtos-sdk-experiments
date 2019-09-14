@@ -6,6 +6,7 @@
 #include "driver/gpio.h"
 
 #include "esp_system.h"
+#include "esp_sleep.h"
 
 #include "denbit.h"
 
@@ -19,6 +20,11 @@ void blinkTask(void *pvParameters)
         cnt++;
         gpio_set_level(DENBIT_RED, cnt % 2);
         gpio_set_level(DENBIT_RGB_RED, cnt % 2);
+
+        if (cnt > 10) {
+          // Connect GPIO16 to RESET (after flashing for this to work)
+          esp_deep_sleep(10e6);
+        }
     }
 }
 
