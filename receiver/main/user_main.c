@@ -17,8 +17,13 @@
 #include "crc.h"
 #include "user_main.h"
 #include "driver/gpio.h"
+#include "driver/uart.h"
 
 #include "denbit.h"
+
+#define UART_BUF_SIZE (1024)
+
+char uart_buffer[UART_BUF_SIZE];
 
 static const char *TAG = "receiver";
 
@@ -169,8 +174,10 @@ static void app_espnow_task(void *pvParameter)
                 ret = app_espnow_data_parse(recv_cb->data, recv_cb->data_len, &recv_state, &recv_seq, &recv_magic);
                 free(recv_cb->data);
                 if (ret == APP_ESPNOW_DATA_BROADCAST) {
-                    ESP_LOGI(TAG, "Receive %dth broadcast data from: "MACSTR", len: %d", recv_seq, MAC2STR(recv_cb->mac_addr), recv_cb->data_len);
-
+                    //ESP_LOGI(TAG, "Receive %dth broadcast data from: "MACSTR", len: %d", recv_seq, MAC2STR(recv_cb->mac_addr), recv_cb->data_len);
+                    uint16_t len = sprintf(uart_buffer, "Receive %dth broadcast data from: "MACSTR", len: %d\n", recv_seq, MAC2STR(recv_cb->mac_addr), recv_cb->data_len);
+                    // Write data back to the UART
+                    uart_write_bytes(UART_NUM_0, (const char *) uart_buffer, len);
                 }
                 else {
                     ESP_LOGI(TAG, "Receive error data from: "MACSTR"", MAC2STR(recv_cb->mac_addr));
@@ -219,6 +226,18 @@ void app_main()
     denbit_init();
     //xTaskCreate(greenBlinkTask, "greenBlinkTask", 180, NULL, 1, &greenBlinkTaskHandle);
     xTaskCreate(redBlinkTask, "redBlinkTask", 180, NULL, 1, &redBlinkTaskHandle);
+
+    // Configure parameters of an UART driver,
+    // communication pins and install the driver
+    uart_config_t uart_config = {
+        .baud_rate = 115200,
+        .data_bits = UART_DATA_8_BITS,
+        .parity    = UART_PARITY_DISABLE,
+        .stop_bits = UART_STOP_BITS_1,
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE
+    };
+    uart_param_config(UART_NUM_0, &uart_config);
+    uart_driver_install(UART_NUM_0, UART_BUF_SIZE * 2, 0, 0, NULL);
 
     // Initialize NVS
     if (nvs_flash_init() != ESP_OK) {
