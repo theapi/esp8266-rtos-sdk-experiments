@@ -31,6 +31,8 @@ static xQueueHandle app_espnow_queue;
 
 TaskHandle_t redBlinkTaskHandle;
 
+uint32_t count = 0;
+
 void redBlinkTask(void *pvParameters)
 {
     while(1) {
@@ -175,7 +177,7 @@ static void app_espnow_task(void *pvParameter)
                 free(recv_cb->data);
                 if (ret == APP_ESPNOW_DATA_BROADCAST) {
                     //ESP_LOGI(TAG, "Receive %dth broadcast data from: "MACSTR", len: %d", recv_seq, MAC2STR(recv_cb->mac_addr), recv_cb->data_len);
-                    uint16_t len = sprintf(uart_buffer, "Receive %dth broadcast data from: "MACSTR", len: %d\n", recv_seq, MAC2STR(recv_cb->mac_addr), recv_cb->data_len);
+                    uint16_t len = sprintf(uart_buffer, "%d - broadcast data from: "MACSTR", len: %d\n", ++count, MAC2STR(recv_cb->mac_addr), recv_cb->data_len);
                     // Write data back to the UART
                     uart_write_bytes(UART_NUM_0, (const char *) uart_buffer, len);
                 }
