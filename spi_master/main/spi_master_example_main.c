@@ -25,11 +25,15 @@ static esp_err_t write_byte(uint8_t data)
 
 static void spi_master_write_slave_task(void *arg)
 {
-    uint8_t count = 0;
+    uint8_t display = 1;
     while (1) {
-        write_byte(count++);
+        if (display == 0) {
+          display = 1;
+        }
+        write_byte(display);
+        display = display << 1;
         //ESP_LOGI(TAG, "Count: %d", count);
-        vTaskDelay(100 / portTICK_RATE_MS);
+        vTaskDelay(1000 / portTICK_RATE_MS);
     }
 }
 
